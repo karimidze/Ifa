@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- Load the Paper.js library -->
+<script type="text/javascript" src="js/paper-full.js"></script>
+<!-- Define inlined PaperScript associate it with myCanvas -->
+<script type="text/paperscript" canvas="myCanvas">
+	project.currentStyle = {
+		fillColor: 'Black'
+	};
+	
+	
+	
+	var ballPositions = [[75, 75], [123, 123], [177, 177], [212,212], [255,255], [297,297], [349,349]];
+	var circlePaths = [];
+	var nodePaths = [];
+	var selectedcount = 0;
+	var selectedId = 0;
+	var radius = 50;
+	
+	var pathHandlers = {
+	mousedrag: function(event) {
+		this.position += event.delta;
+		if (nodePaths.length != 0){
+			for (var a = 0, len = nodePaths.length; a < len; a++){
+			if (nodePaths[a].data.circlePath1 == this.id){
+				nodePaths[a].segments[0].point += event.delta
+				}
+			else if (nodePaths[a].data.circlePath2 == this.id){
+				nodePaths[a].segments[1].point += event.delta
+			}
+			}
+		}
+	},
+	mousedown: function(event) {
+		if (this.data.selected == false && selectedcount != 1)
+		{
+			this.fillColor = 'yellow';
+			this.data.selected = true;
+			selectedcount++;
+			selectedId = this.id;
+			console.log('selectedcount',selectedcount);
+			console.log('data = ',this.data.selected);
+			for (var i = 0, len = circlePaths.length; i < len; i++){console.log(circlePaths[i].data.selected)}	
+		}
+		else if (selectedcount == 1)
+		{
+			for (var i = 0, len = circlePaths.length; i < len; i++){
+			circlePaths[i].fillColor = 'black';
+			circlePaths[i].data.selected = false;
+			}
+			if (selectedId != this.id){
+			nodePath.add(this.position);
+			nodePath.data.circlePath2 = this.id;
+			nodePaths.push(nodePath);
+			console.log('id1=',nodePath.data.circlePath1,'id2=',nodePath.data.circlePath2);
+			console.log(nodePath.segments[1].point);
+			for (var i = 0, len = nodePaths.length; i < len; i++){console.log('массив путей:', nodePaths[i]);}
+			selectedcount = 0;
+			selectedId = 0;
+			}
+			else {
+			selectedcount = 0;
+			selectedId = 0;
+			}
+		}
+		
+	},
+	mouseenter: function(event) {circleEntered = true},
+	mouseleave: function(event) {circleEntered = false},
+	mouseup: function(event) {
+		nodePath = new Path();
+		nodePath.strokeColor = 'black';
+		nodePath.add(this.position);
+		nodePath.data.circlePath1 = this.id;
+		//for (var i = 0, len = nodePaths.length; i < len; i++){console.log(nodePaths[i]);}
+	}
+	}
+	
+	for (var i = 0, l = ballPositions.length; i < l; i++) {
+		var circlePath = new Path.Circle({
+		center: ballPositions[i],
+		radius: 25
+		});
+		circlePath.data.selected = false;
+		console.log(circlePath.id);
+		circlePath.on(pathHandlers); //Врубаем обработчики
+		circlePaths.push(circlePath);
+		
+	}
+
+	
+	
+	var destination = Point.random() * view.size;
+	var i = 0;
+	var circleEntered = false;
+	view.onFrame = function(event) { 
+		// Each frame, move the path 1/30th of the difference in position
+		// between it and the destination.
+		// The vector is the difference between the position of
+		// the text item and the destination point:
+		
+		var vector = destination - circlePaths[i].position;
+		
+		// We add 1/150th of the vector to the position property
+		// of the text item, to move it in the direction of the
+		// destination point:
+		if (circleEntered == false){
+		circlePaths[i].position += vector / 150;
+		if (nodePaths.length != 0 && circleEntered == false){
+			for (var a = 0, len = nodePaths.length; a < len; a++){
+			if (nodePaths[a].data.circlePath1 == circlePaths[i].id){
+				nodePaths[a].segments[0].point += vector / 150
+				}
+			else if (nodePaths[a].data.circlePath2 == circlePaths[i].id){
+				nodePaths[a].segments[1].point += vector / 150
+			}
+			}
+		}
+		}
+		else {
+			i++;
+			destination = Point.random() * view.size;
+		}
+		//console.log(nodePaths.length);
+		
+		if (vector.length < 5) {
+			destination = Point.random() * view.size;
+			i++;
+		}
+		if (i == ballPositions.length){i=0}
+	} 
+
+	var paths = [];
+	var path;
+	
+	
+
+
+</script>
+<!-- CSS -->
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+	<canvas id="myCanvas" resize></canvas>
+</body>
+</html>
