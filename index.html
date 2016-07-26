@@ -94,7 +94,6 @@
 	var destination = Point.random() * view.size;
 	var i = 0;
 	var circleEntered = false;
-	view.onFrame = function(event) { 
 		// Each frame, move the path 1/30th of the difference in position
 		// between it and the destination.
 		// The vector is the difference between the position of
@@ -105,7 +104,6 @@
 		// We add 1/150th of the vector to the position property
 		// of the text item, to move it in the direction of the
 		// destination point:
-		if (circleEntered == false){
 		circlePaths[i].position += vector / 150;
 		if (nodePaths.length != 0 && circleEntered == false){
 			for (var a = 0, len = nodePaths.length; a < len; a++){
@@ -144,4 +142,3 @@
 <body>
 	<canvas id="myCanvas" resize></canvas>
 </body>
-</html>
