@@ -9,84 +9,111 @@
 		fillColor: 'Black'
 	};
 	
-	
-	
-	var ballPositions = [[75, 75], [123, 123], [177, 177], [212,212], [255,255], [297,297], [349,349]];
+	var ballPositions = [[100,100],[200,200],[200,200],[200,200]];
 	var circlePaths = [];
 	var nodePaths = [];
 	var selectedcount = 0;
 	var selectedId = 0;
 	var radius = 50;
+	var pathdoubled = false;
 	
-	var pathHandlers = {
-	mousedrag: function(event) {
-		this.position += event.delta;
-		if (nodePaths.length != 0){
-			for (var a = 0, len = nodePaths.length; a < len; a++){
-			if (nodePaths[a].data.circlePath1 == this.id){
-				nodePaths[a].segments[0].point += event.delta
+	var pathHandlers = 
+	{
+		mousedrag: function(event) {
+			this.position += event.delta;
+			if (nodePaths.length != 0){
+				for (var a = 0, len = nodePaths.length; a < len; a++){
+				if (nodePaths[a].data.circlePath1 == this.data.id){
+					nodePaths[a].segments[0].point += event.delta
+					}
+				else if (nodePaths[a].data.circlePath2 == this.data.id){
+					nodePaths[a].segments[1].point += event.delta
 				}
-			else if (nodePaths[a].data.circlePath2 == this.id){
-				nodePaths[a].segments[1].point += event.delta
+				}
 			}
+		},
+		mousedown: function(event) {
+			if (this.data.selected == false && selectedcount != 1)
+			{
+				this.fillColor = 'yellow';
+				this.data.selected = true;
+				selectedcount++;
+				selectedId = this.id;
 			}
-		}
-	},
-	mousedown: function(event) {
-		if (this.data.selected == false && selectedcount != 1)
-		{
-			this.fillColor = 'yellow';
-			this.data.selected = true;
-			selectedcount++;
-			selectedId = this.id;
-			console.log('selectedcount',selectedcount);
-			console.log('data = ',this.data.selected);
-			for (var i = 0, len = circlePaths.length; i < len; i++){console.log(circlePaths[i].data.selected)}	
-		}
-		else if (selectedcount == 1)
-		{
-			for (var i = 0, len = circlePaths.length; i < len; i++){
-			circlePaths[i].fillColor = 'black';
-			circlePaths[i].data.selected = false;
+			else if (selectedcount == 1)
+			{
+				for (var i = 0, len = circlePaths.length; i < len; i++){
+				circlePaths[i].fillColor = 'black';
+				circlePaths[i].data.selected = false;
+				}
+				if (selectedId != this.id)
+				{
+					if (nodePaths.length == 0)
+					{
+						nodePath.add(this.position);
+						nodePath.data.circlePath2 = this.data.id;
+						nodePaths.push(nodePath);
+						console.log('nodePaths length = ', nodePaths.length);
+						//for (var i = 0, len = nodePaths.length; i < len; i++){console.log('массив путей:', nodePaths[i]);}
+						selectedcount = 0;
+						selectedId = 0;
+					}
+					else 
+					{
+						for (var a = 0, len = nodePaths.length; a < len; a++){
+							if ((nodePaths[a].data.circlePath1 == nodePath.data.circlePath1 && nodePaths[a].data.circlePath2 == this.data.id) || (nodePaths[a].data.circlePath1 == this.data.id && nodePaths[a].data.circlePath2 == nodePath.data.circlePath1))
+							{pathdoubled = true;}
+						}
+						if (pathdoubled != true)
+						{
+						nodePath.add(this.position);
+						nodePath.data.circlePath2 = this.data.id;
+						nodePaths.push(nodePath);
+						console.log(nodePaths);
+						//console.log('id1=',nodePath.data.circlePath1,'id2=',nodePath.data.circlePath2);
+						//console.log(nodePath.segments[1].point);
+						//for (var i = 0, len = nodePaths.length; i < len; i++){console.log('массив путей:', nodePaths[i]);}
+						selectedcount = 0;
+						selectedId = 0;
+						}
+						else {
+						for (var b = 0, len = nodePaths.length; b < len; b++){
+						console.log('id1=',nodePaths[b].data.circlePath1,' id2=',nodePaths[b].data.circlePath2,'nodePaths length = ', nodePaths.length);
+						}
+						console.log('Путь дублирован? ',pathdoubled);
+						selectedcount = 0;
+						selectedId = 0;
+						pathdoubled = false;
+						}
+					}
+				}
+				else {
+				selectedcount = 0;
+				selectedId = 0;
+				}
 			}
-			if (selectedId != this.id){
+		},
+		mouseenter: function(event) {circleEntered = true},
+		mouseleave: function(event) {circleEntered = false},
+		mouseup: function(event) {
+			nodePath = new Path();
+			nodePath.strokeColor = 'black';
 			nodePath.add(this.position);
-			nodePath.data.circlePath2 = this.id;
-			nodePaths.push(nodePath);
-			console.log('id1=',nodePath.data.circlePath1,'id2=',nodePath.data.circlePath2);
-			console.log(nodePath.segments[1].point);
-			for (var i = 0, len = nodePaths.length; i < len; i++){console.log('массив путей:', nodePaths[i]);}
-			selectedcount = 0;
-			selectedId = 0;
-			}
-			else {
-			selectedcount = 0;
-			selectedId = 0;
-			}
+			nodePath.data.circlePath1 = this.data.id;
 		}
-		
-	},
-	mouseenter: function(event) {circleEntered = true},
-	mouseleave: function(event) {circleEntered = false},
-	mouseup: function(event) {
-		nodePath = new Path();
-		nodePath.strokeColor = 'black';
-		nodePath.add(this.position);
-		nodePath.data.circlePath1 = this.id;
-		//for (var i = 0, len = nodePaths.length; i < len; i++){console.log(nodePaths[i]);}
-	}
 	}
 	
-	for (var i = 0, l = ballPositions.length; i < l; i++) {
+	
+	for (var b = 0, l = ballPositions.length; b < l; b++) {
 		var circlePath = new Path.Circle({
-		center: ballPositions[i],
+		center: ballPositions[b],
 		radius: 25
 		});
 		circlePath.data.selected = false;
-		console.log(circlePath.id);
+		circlePath.data.id = [b];
 		circlePath.on(pathHandlers); //Врубаем обработчики
 		circlePaths.push(circlePath);
-		
+		console.log(circlePath.data.id);
 	}
 	var destination = Point.random() * view.size;
 	var i = 0;
@@ -106,10 +133,10 @@
 		circlePaths[i].position += vector / 150;
 		if (nodePaths.length != 0 && circleEntered == false){
 			for (var a = 0, len = nodePaths.length; a < len; a++){
-			if (nodePaths[a].data.circlePath1 == circlePaths[i].id){
+			if (nodePaths[a].data.circlePath1 == circlePaths[i].data.id){
 				nodePaths[a].segments[0].point += vector / 150
 				}
-			else if (nodePaths[a].data.circlePath2 == circlePaths[i].id){
+			else if (nodePaths[a].data.circlePath2 == circlePaths[i].data.id){
 				nodePaths[a].segments[1].point += vector / 150
 			}
 			}
@@ -131,9 +158,6 @@
 	var paths = [];
 	var path;
 	
-	
-
-
 </script>
 <!-- CSS -->
 <link rel="stylesheet" href="css/main.css">
